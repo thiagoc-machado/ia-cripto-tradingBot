@@ -30,10 +30,10 @@ class CryptoTradingEnv(gym.Env):
     
     @staticmethod
     def load_data():
-        df = pd.read_csv('data.csv', skiprows=1)
-        df['datetime'] = pd.to_datetime(df['datetime'], utc=True, infer_datetime_format=True)
-        df = df.set_index('datetime')
+        df = pd.read_csv('historical_data_with_indicators.csv', index_col=0, parse_dates=True)
+        df = df.dropna()
         return df
+
 
     def _get_observation(self):
         return self.df.iloc[self.current_step].values[1:].astype('float64')
