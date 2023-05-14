@@ -1,6 +1,7 @@
 import ccxt
 import pandas as pd
 import pandas_ta as ta
+from ta.trend import MACD
 from config import (
     SYMBOL,
     TIMEFRAME,
@@ -65,22 +66,18 @@ print("Calculando indicadores técnicos...")
 df["rsi"] = ta.rsi(df["close"], length=RSI_PERIOD)
 for period in SMA_PERIODS:
     df[f"sma_{period}"] = ta.sma(df["close"], length=period)
-df["macd"], df["macd_signal"], df["macd_histogram"] = ta.macd(
-    df["close"],
-    fast=MACD_FAST_PERIOD,
-    slow=MACD_SLOW_PERIOD,
-    signal=MACD_SIGNAL_PERIOD,
-)
+    
+macd_indicator = MACD(df['close'], window_slow=MACD_SLOW_PERIOD, window_fast=MACD_FAST_PERIOD, window_sign=MACD_SIGNAL_PERIOD)
+df['macd'] = macd_indicator.macd()
+df['macd_signal'] = macd_indicator.macd_signal()
+df['macd_histogram'] = macd_indicator.macd_diff()
 
 # Remover o primeiro dia de dados
 start_timestamp = exchange.parse8601(START_DATE + "T00:00:00Z")
 df = df[df.index >= pd.to_datetime(start_timestamp, unit="ms")]
 numeric_columns = [col for col in df.columns if col not in ['timestamp', 'date', 'time']]
 
-print("Colunas presentes no dataframe:")
-print(df.columns)
-
-
+print(df.head())
 
 df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric)
 
