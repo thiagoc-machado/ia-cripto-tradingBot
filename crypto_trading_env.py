@@ -4,13 +4,17 @@ import numpy as np
 import pandas as pd
 import gym
 from gym import spaces
-from config import TRADE_PENALTY, INITIAL_BALANCE
+from config import TRADE_PENALTY, INITIAL_BALANCE, SHORT, MARKET, MODE
 
 class CryptoTradingEnv(gym.Env):
     metadata = {'render.modes': ['human']}
 
-    def __init__(self, df):
+    def __init__(self, df, **kwargs):
         super(CryptoTradingEnv, self).__init__()
+        assert MARKET in ['spot', 'futures'], "Invalid market option. Must be 'spot' or 'futures'."
+        assert MODE in ['cross', 'isolated'], "Invalid mode option. Must be 'cross' or 'isolated'."
+        assert isinstance(SHORT, bool), "Invalid short option. Must be True or False."
+
         self.df = df
         self.action_space = spaces.Discrete(3)  # Comprar, vender ou manter
         self.observation_space = spaces.Box(low=0, high=np.finfo(np.float32).max, shape=(len(self.df.columns) - 1,), dtype=np.float32)

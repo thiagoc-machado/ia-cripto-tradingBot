@@ -40,10 +40,10 @@ env_config = CryptoTradingEnvConfig(
     df=test_data,
     short=SHORT,
     market=MARKET,
-    mode=MODE
-    start_date = START_DATE
-    end_date = END_DATE
-    timeframe = TIMEFRAME
+    mode=MODE,
+    start_date = START_DATE,
+    end_date = END_DATE,
+    timeframe = TIMEFRAME,
     symbol = SYMBOL
     # Defina outros parâmetros de configuração, se necessário
 )
