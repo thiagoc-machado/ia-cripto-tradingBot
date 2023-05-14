@@ -12,6 +12,7 @@ class CryptoTradingEnv(gym.Env):
     def __init__(self, df):
         super(CryptoTradingEnv, self).__init__()
 
+        self.df = CryptoTradingEnv.load_data()
         self.df = df
         self.action_space = spaces.Discrete(3)  # Comprar, vender ou manter
         self.observation_space = spaces.Box(low=0, high=np.finfo(np.float32).max, shape=(len(df.columns) - 1,), dtype=np.float32)
@@ -26,6 +27,13 @@ class CryptoTradingEnv(gym.Env):
         self.held_crypto = 0
         
         return self._get_observation()
+    
+    @staticmethod
+    def load_data():
+        df = pd.read_csv('data.csv', skiprows=1)
+        df['datetime'] = pd.to_datetime(df['datetime'], utc=True, infer_datetime_format=True)
+        df = df.set_index('datetime')
+        return df
 
     def _get_observation(self):
         return self.df.iloc[self.current_step].values[1:].astype('float64')

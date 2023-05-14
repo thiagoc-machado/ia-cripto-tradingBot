@@ -9,7 +9,8 @@ from crypto_trading_env import CryptoTradingEnv
 df = pd.read_csv("historical_data_with_indicators.csv", index_col=0, parse_dates=True)
 
 # Criar o ambiente de negociação de criptomoedas
-env = CryptoTradingEnv(df)
+#env = CryptoTradingEnv(df)
+env = DummyVecEnv([lambda: CryptoTradingEnv(None)])
 env = DummyVecEnv([lambda: env])
 
 # Definir os hiperparâmetros do modelo
