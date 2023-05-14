@@ -3,6 +3,9 @@ SYMBOL = "BTC/USDT"                # Símbolo da moeda (par de negociação)
 TIMEFRAME = "3m"                   # Intervalo de tempo das velas (1 minuto para scalping)
 START_DATE = "2023-01-01"          # Data de início para coleta de dados históricos
 END_DATE = "2023-05-13"            # Data final para coleta de dados históricos
+SHORT = True
+MARKET = 'futures'
+MODE = 'isolated'
 
 # Parâmetros dos indicadores técnicos
 RSI_PERIOD = 7                     # Período do RSI (menor para reações mais rápidas)
@@ -20,7 +23,8 @@ TRADE_PENALTY = 0.001              # Penalidade por manter posição aberta (inc
 
 # Parâmetros do backtesting
 INITIAL_BALANCE = 10000            # Saldo inicial para backtesting
-COMMISSION = 0.001                 # Comissão por trade (taxa da corretora)
+COMMISSION = 0.0017                 # Comissão por trade (taxa da corretora)
+
 
 # Configurações da Binance
 BINANCE_API_KEY = "YOUR_BINANCE_API_KEY"        # Chave da API da Binance

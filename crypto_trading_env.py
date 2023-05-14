@@ -28,8 +28,9 @@ class CryptoTradingEnv(gym.Env):
     @staticmethod
     def load_data():
         file_path = 'historical_data_with_indicators.csv'
-        df = pd.read_csv(file_path, skiprows=1)
-        print(df.head())
+        column_names = ['open', 'high', 'low', 'close', 'volume', 'rsi', 'sma_10', 'sma_20', 'sma_50', 'macd', 'macd_signal', 'macd_histogram']  # Substitua isso pelos nomes de coluna corretos
+        df = pd.read_csv(file_path, header=None, names=column_names, skiprows=1)
+        df.reset_index(drop=True, inplace=True)
         return df
 
 
@@ -39,7 +40,6 @@ class CryptoTradingEnv(gym.Env):
 
     def step(self, action):
         self.current_step += 1
-
         current_price = self.df.loc[self.current_step, 'close']
         reward = 0
         done = False
