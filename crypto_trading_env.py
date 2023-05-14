@@ -11,12 +11,13 @@ class CryptoTradingEnv(gym.Env):
 
     def __init__(self, df):
         super(CryptoTradingEnv, self).__init__()
-
-        self.df = CryptoTradingEnv.load_data()
+        if df is None:
+            self.df = self.load_data()
+        else:
+            self.df = df
         self.df = df
         self.action_space = spaces.Discrete(3)  # Comprar, vender ou manter
-        self.observation_space = spaces.Box(low=0, high=np.finfo(np.float32).max, shape=(len(df.columns) - 1,), dtype=np.float32)
-
+        self.observation_space = spaces.Box(low=0, high=np.finfo(np.float32).max, shape=(len(self.df.columns) - 1,), dtype=np.float32)
         self.reset()
         if 'MACD_5_13_4' in df.columns:
             df = df.drop('MACD_5_13_4', axis=1)
@@ -30,8 +31,9 @@ class CryptoTradingEnv(gym.Env):
     
     @staticmethod
     def load_data():
-        df = pd.read_csv('historical_data_with_indicators.csv', index_col=0, parse_dates=True)
-        df = df.dropna()
+        file_path = 'historical_data_with_indicators.csv'
+        df = pd.read_csv(file_path, skiprows=1)
+        print(df.head())
         return df
 
 
