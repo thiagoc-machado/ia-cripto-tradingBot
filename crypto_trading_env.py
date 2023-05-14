@@ -11,10 +11,6 @@ class CryptoTradingEnv(gym.Env):
 
     def __init__(self, df):
         super(CryptoTradingEnv, self).__init__()
-        if df is None:
-            self.df = self.load_data()
-        else:
-            self.df = df
         self.df = df
         self.action_space = spaces.Discrete(3)  # Comprar, vender ou manter
         self.observation_space = spaces.Box(low=0, high=np.finfo(np.float32).max, shape=(len(self.df.columns) - 1,), dtype=np.float32)

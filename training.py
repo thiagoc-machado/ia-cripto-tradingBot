@@ -6,12 +6,11 @@ from config import LEARNING_RATE, DISCOUNT_FACTOR, EXPLORATION_RATE
 from crypto_trading_env import CryptoTradingEnv
 
 # Carregar os dados com indicadores técnicos
-df = pd.read_csv("historical_data_with_indicators.csv", index_col=0, parse_dates=True)
+df = CryptoTradingEnv.load_data()
 
 # Criar o ambiente de negociação de criptomoedas
 #env = CryptoTradingEnv(df)
-env = DummyVecEnv([lambda: CryptoTradingEnv(None)])
-env = DummyVecEnv([lambda: env])
+env = DummyVecEnv([lambda: CryptoTradingEnv(df)])
 
 # Definir os hiperparâmetros do modelo
 model_params = {
