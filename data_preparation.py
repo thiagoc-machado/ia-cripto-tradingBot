@@ -28,6 +28,9 @@ def fetch_historical_data(symbol, timeframe, start_date, end_date):
     print("Baixando dados históricos...")
     while since < end_timestamp:
         candles = exchange.fetch_ohlcv(symbol, timeframe, since)
+        print(f"Baixados {len(candles)} dados históricos.", end="\r")
+        print(f"processando {(since / end_timestamp) * 100:.2f}% - {since} até {end_timestamp}", end="\r")
+
         if not candles:
             break
         data.extend(candles)
@@ -39,6 +42,11 @@ def fetch_historical_data(symbol, timeframe, start_date, end_date):
 # Baixar os dados históricos
 historical_data = fetch_historical_data(SYMBOL, TIMEFRAME, START_DATE, END_DATE)
 
+# Verificar se há dados histéricos
+
+if not historical_data:
+    print("Nenhum dado histérico encontrado.")
+    exit()
 
 print("Preparando os dados...")
 # Converter para DataFrame do Pandas
@@ -67,7 +75,15 @@ df["macd"], df["macd_signal"], df["macd_histogram"] = ta.macd(
 # Remover o primeiro dia de dados
 start_timestamp = exchange.parse8601(START_DATE + "T00:00:00Z")
 df = df[df.index >= pd.to_datetime(start_timestamp, unit="ms")]
-df = df.apply(pd.to_numeric)
+numeric_columns = [col for col in df.columns if col not in ['timestamp', 'date', 'time']]
+
+print("Colunas presentes no dataframe:")
+print(df.columns)
+
+
+
+df[numeric_columns] = df[numeric_columns].apply(pd.to_numeric)
+
 
 print("Salvando dados e indicadores em um arquivo CSV...")
 # Salvar o DataFrame com dados e indicadores em um arquivo CSV
