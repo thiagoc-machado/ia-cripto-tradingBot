@@ -52,6 +52,7 @@ else:
 # Função para baixar dados históricos do mercado spot
 def fetch_historical_data_spot(symbol, timeframe, start_date, end_date):
     data = []
+    init_prog = 0
     since = exchange.parse8601(start_date + "T00:00:00Z") - 86400000  # Subtrai 1 dia em milissegundos
     end_timestamp = exchange.parse8601(end_date + "T23:59:59Z")
 
@@ -61,8 +62,10 @@ def fetch_historical_data_spot(symbol, timeframe, start_date, end_date):
     print("Baixando dados históricos...")
     while since < end_timestamp:
         candles = exchange.fetch_ohlcv(symbol, timeframe, since)
+        if init_prog == 0:
+            init_prog = since
         print(f"Baixados {len(candles)} dados históricos.", end="\r")
-        print(f"processando {((since) / (end_timestamp)) * 100:.4f}% - {since} até {end_timestamp}", end="\r")
+        print(f"processando {((since - init_prog) / (end_timestamp - init_prog)) * 100:.4f}% - {since} até {end_timestamp}", end="\r")
 
         if not candles:
             break
@@ -76,6 +79,7 @@ def fetch_historical_data_spot(symbol, timeframe, start_date, end_date):
 # Função para baixar dados históricos do mercado de futuros perpétuos
 def fetch_historical_data_perp(symbol, timeframe, start_date, end_date):
     data = []
+    init_prog = 0
     since = exchange.parse8601(start_date + "T00:00:00Z") - 86400000  # Subtrai 1 dia em milissegundos
     end_timestamp = exchange.parse8601(end_date + "T23:59:59Z")
 
@@ -86,8 +90,10 @@ def fetch_historical_data_perp(symbol, timeframe, start_date, end_date):
     limit = 1000
     while since < end_timestamp:
         candles = exchange.fetch_ohlcv(symbol, timeframe, since, limit)
+        if init_prog == 0:
+            init_prog = since
         print(f"Baixados {len(candles)} dados históricos.", end="\r")
-        print(f"processando {((since) / (end_timestamp)) * 100:.4f}% - {since} até {end_timestamp}", end="\r")
+        print(f"processando {((since - init_prog) / (end_timestamp - init_prog)) * 100:.4f}% - {since} até {end_timestamp}", end="\r")
 
         if not candles:
             break

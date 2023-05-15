@@ -1,18 +1,21 @@
 # Parâmetros de mercado e dados históricos
-SYMBOL = "BTC/USDT"                # Símbolo da moeda (par de negociação)
-TIMEFRAME = "3m"                   # Intervalo de tempo das velas (1 minuto para scalping)
-START_DATE = "2023-04-13"          # Data de início para coleta de dados históricos
+SYMBOL = "ADA/USDT"                # Símbolo da moeda (par de negociação)
+TIMEFRAME = "15m"                   # Intervalo de tempo das velas (1 minuto para scalping)
+START_DATE = "2022-04-13"          # Data de início para coleta de dados históricos
 END_DATE = "2023-05-13"            # Data final para coleta de dados históricos
-SHORT = True                       #Can short
-MARKET = 'futures'                  # 'spot' para mercado à vista, 'futures' para mercado de futuros
-MODE = 'isolated'                   # 'cross' ou 'isolated'
+SHORT = False                       # Can short
+MARKET = 'spot'                    # 'spot' para mercado à vista, 'futures' para mercado de futuros
+MODE = 'isolated'                  # 'cross' ou 'isolated'
+ORDER_TYPE = 'market'               # Tipo de ordem (MARKET ou LIMIT)
+SLIPPAGE = 0.01                    # Taxa de slippage (ajustado para scalping)
+SCALE_FACTOR = 1000
 
 # Parâmetros dos indicadores técnicos
-RSI_PERIOD = 7                     # Período do RSI (menor para reações mais rápidas)
+RSI_PERIOD = 3                     # Período do RSI (menor para reações mais rápidas)
 MACD_FAST_PERIOD = 5               # Período da média móvel rápida do MACD
 MACD_SLOW_PERIOD = 13              # Período da média móvel lenta do MACD
 MACD_SIGNAL_PERIOD = 4             # Período da linha de sinal do MACD
-SMA_PERIODS = [10, 20, 50]         # Períodos das médias móveis simples (ajustados para scalping)
+SMA_PERIODS = [3, 5, 7]            # Períodos das médias móveis simples (ajustados para scalping)
 
 # Parâmetros de aprendizado por reforço
 LEARNING_RATE = 0.01               # Taxa de aprendizado do algoritmo de aprendizado por reforço
@@ -20,9 +23,11 @@ DISCOUNT_FACTOR = 0.99             # Fator de desconto para o algoritmo de apren
 EXPLORATION_RATE = 0.1             # Taxa de exploração para o algoritmo de aprendizado por reforço
 REWARD_MULTIPLIER = 100            # Multiplicador de recompensa por trade (ajusta a escala das recompensas)
 TRADE_PENALTY = 0.001              # Penalidade por manter posição aberta (incentiva trades rápidos)
+TIME_STEPS = 500000                # Número de passos de tempo para o treinamento
+
 
 # Parâmetros do backtesting
-INITIAL_BALANCE = 10000            # Saldo inicial para backtesting
+INITIAL_BALANCE = 1000              # Saldo inicial para backtesting
 COMMISSION = 0.0017                 # Comissão por trade (taxa da corretora)
 
 
@@ -30,6 +35,16 @@ COMMISSION = 0.0017                 # Comissão por trade (taxa da corretora)
 BINANCE_API_KEY = "YOUR_BINANCE_API_KEY"        # Chave da API da Binance
 BINANCE_SECRET_KEY = "YOUR_BINANCE_SECRET_KEY"  # Chave secreta da API da Binance
 
+#Parametros de trading
+TAKE_PROFIT = 5.00                  # Take profit (ajustado para scalping)
+STOP_LOSS = 5.00                    # Stop loss (ajustado para scalping)
+TRAILING_STOP_LOSS = 1.00           # Stop loss de trailing (ajustado para scalping)
+LEVERAGE = 3                        # Leverage (ajustado para scalping)
+DCA = True                          # DCA (ajustado para scalping)
+DCA_VALUE = 0.50                    # Valor da DCA (ajustado para scalping)
+ORDER_TYPE = 'market'               # Tipo de ordem (MARKET ou LIMIT)
+SLIPPAGE = 0.01                    # Taxa de slippage (ajustado para scalping)
+ 
 
 '''
 Learning Rate (taxa de aprendizado): 

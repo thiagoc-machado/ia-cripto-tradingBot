@@ -1,6 +1,6 @@
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
-from config import LEARNING_RATE, DISCOUNT_FACTOR, EXPLORATION_RATE, SHORT, MARKET, MODE
+from config import LEARNING_RATE, DISCOUNT_FACTOR, EXPLORATION_RATE, SHORT, MARKET, MODE, TIME_STEPS
 from crypto_trading_env import CryptoTradingEnv
 
 # Carregar os dados com indicadores técnicos
@@ -24,7 +24,7 @@ model_params = {
 # Criar e treinar o modelo PPO
 model = PPO(**model_params)
 print("Iniciando o treinamento do modelo...")
-model.learn(total_timesteps=200000)
+model.learn(total_timesteps=TIME_STEPS)
 print("Treinamento concluído.")
 
 # Salvar o modelo treinado
