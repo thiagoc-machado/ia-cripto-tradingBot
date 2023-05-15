@@ -27,11 +27,11 @@ df = CryptoTradingEnv.load_data()
 print("Dados históricos carregados")
 
 # Define the model file
-model_file = "crypto_trading_agent"
+model_file = os.path.abspath('crypto_trading_agent.zip')
 
 # Check if the model file exists
 if not os.path.isfile(model_file + ".zip"):
-    raise Exception(f"Arquivo do modelo {model_file}.zip não encontrado.")
+    raise Exception(f"Arquivo do modelo {model_file} não encontrado.")
 
 # Load the trained model
 model = PPO.load(model_file)
