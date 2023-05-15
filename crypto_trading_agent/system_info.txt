@@ -1,7 +1,0 @@
-- OS: Windows-10-10.0.25346-SP0 10.0.25346
-- Python: 3.11.3
-- Stable-Baselines3: 1.8.0
-- PyTorch: 2.0.1+cpu
-- GPU Enabled: False
-- Numpy: 1.24.3
-- Gym: 0.26.2

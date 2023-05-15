@@ -23,24 +23,6 @@ def backtest(model, env):
 
     return trades
 
-df = CryptoTradingEnv.load_data()
-print("Dados históricos carregados")
-
-# Define the model file
-model_file = os.path.abspath('crypto_trading_agent.zip')
-
-# Check if the model file exists
-if not os.path.isfile(model_file + ".zip"):
-    raise Exception(f"Arquivo do modelo {model_file} não encontrado.")
-
-# Load the trained model
-model = PPO.load(model_file)
-print("Modelo carregado")
-
-# Create the trading environment
-env = CryptoTradingEnv(df, mode=MODE, short=SHORT, market=MARKET)
-print("Ambiente criado")
-
 # Implementar a análise de trades e exibir os resultados
 def analyze_trades(trades):
     gains = []
@@ -73,16 +55,39 @@ def analyze_trades(trades):
 
 
 def plot_trades(trades, df):
-    # Aqui você pode criar gráficos para visualizar os resultados dos trades,
-    # como gráficos de velas e indicadores técnicos usando bibliotecas como
-    # matplotlib, plotly, etc.
-    pass
+    fig, ax = plt.subplots()
+    trade_data = pd.DataFrame(trades)
+
+    ax.plot(df.index, df['close'], label='Preço de fechamento')
+
+    for _, trade in trade_data.iterrows():
+        color = 'g' if trade['profit'] > 0 else 'r'
+        ax.plot([trade['open_time'], trade['close_time']], [trade['entry_price'], trade['exit_price']], color=color, linestyle='-', marker='o')
+        ax.annotate(f"{trade['profit']:.2f}", (trade['close_time'], trade['exit_price']), textcoords="offset points", xytext=(-15,7), fontsize=8, color=color, ha='center')
+
+    ax.set_title(f'{SYMBOL} - Trades de backtesting')
+    ax.set_xlabel('Data e Hora')
+    ax.set_ylabel('Preço')
+    plt.legend()
+    plt.show()
 
 
 if __name__ == "__main__":
     # Carregar o modelo treinado e fazer backtesting
-    model_path = "crypto_trading_agent/data"
-    model = PPO.load(model_path)
+    # Carregar os dados históricos
+    df = CryptoTradingEnv.load_data()
+    print("Dados históricos carregados")
+    # Define the model file
+    model_dir = 'crypto_trading_agent'
+    model_file = "crypto_trading_agent.zip"
+
+    # Carrega o modelo
+    model = PPO.load(model_file)
+    print("Modelo carregado")
+
+    # Create the trading environment
+    env = CryptoTradingEnv(df, mode=MODE, short=SHORT, market=MARKET)
+    print("Ambiente criado")
 
     # Realizar backtesting
     trades = backtest(model, env)
@@ -91,4 +96,4 @@ if __name__ == "__main__":
     analyze_trades(trades)
 
     # Plotar os trades e resultados
-    plot_trades(trades, env.data.df)
+    plot_trades(trades, df)
