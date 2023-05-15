@@ -1,79 +1,94 @@
-import pandas as pd
+import os
+import json
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from stable_baselines3 import PPO
-from config import CryptoTradingEnvConfig
+from config import *
 from crypto_trading_env import CryptoTradingEnv
-from config import SHORT, MARKET, MODE, START_DATE, END_DATE, TIMEFRAME, SYMBOL
+from stable_baselines3.common.save_util import load_from_zip_file
 
-def load_test_data(csv_file):
-    df = pd.read_csv(csv_file)
-    # Certifique-se de que as colunas sejam as mesmas que você usou durante o treinamento
-    return df
 
-def plot_trades(df, trades, title):
-    fig, ax = plt.subplots()
+def backtest(model, env):
+    trades = []
+    obs = env.reset()
+    done = False
 
-    # Plote o gráfico de velas
-    df['date'] = pd.to_datetime(df.index, unit='s')
-    df.set_index('date', inplace=True)
-    df[['open', 'high', 'low', 'close']].plot(ax=ax, lw=1, figsize=(14, 7))
+    while not done:
+        action, _ = model.predict(obs)
+        obs, reward, done, info = env.step(action)
 
-    # Plote os pontos de entrada e saída
+        if "trade" in info:
+            trades.append(info["trade"])
+
+    return trades
+
+df = CryptoTradingEnv.load_data()
+print("Dados históricos carregados")
+
+# Define the model file
+model_file = "crypto_trading_agent"
+
+# Check if the model file exists
+if not os.path.isfile(model_file + ".zip"):
+    raise Exception(f"Arquivo do modelo {model_file}.zip não encontrado.")
+
+# Load the trained model
+model = PPO.load(model_file)
+print("Modelo carregado")
+
+# Create the trading environment
+env = CryptoTradingEnv(df, mode=MODE, short=SHORT, market=MARKET)
+print("Ambiente criado")
+
+# Implementar a análise de trades e exibir os resultados
+def analyze_trades(trades):
+    gains = []
+    losses = []
+    trade_durations = []
+
     for trade in trades:
-        entry_date, entry_price, exit_date, exit_price, profit = trade
-        color = 'g' if profit > 0 else 'r'
-        ax.scatter(entry_date, entry_price, marker='^', c=color, s=100)
-        ax.scatter(exit_date, exit_price, marker='v', c=color, s=100)
-        ax.text(exit_date, exit_price, f'{profit * 100:.2f}%', fontsize=12)
+        pnl = trade['pnl']
+        duration = trade['duration']
+        trade_durations.append(duration)
 
-    ax.set_title(title)
-    ax.set_ylabel('Price')
-    fig.tight_layout()
-    plt.show()
-    fig.savefig('trades.png')
+        if pnl > 0:
+            gains.append(pnl)
+        else:
+            losses.append(pnl)
 
-model = PPO.load("trained_model.zip")
-test_data = load_test_data("test_data.csv")
+    num_trades = len(trades)
+    num_gainers = len(gains)
+    num_losers = len(losses)
+    avg_gain = np.mean(gains) if gains else 0
+    avg_loss = np.mean(losses) if losses else 0
+    avg_duration = np.mean(trade_durations)
 
-env_config = CryptoTradingEnvConfig(
-    df=test_data,
-    short=SHORT,
-    market=MARKET,
-    mode=MODE,
-    start_date = START_DATE,
-    end_date = END_DATE,
-    timeframe = TIMEFRAME,
-    symbol = SYMBOL
-    # Defina outros parâmetros de configuração, se necessário
-)
+    print(f"Total de trades: {num_trades}")
+    print(f"Trades ganhadores: {num_gainers}")
+    print(f"Trades perdedores: {num_losers}")
+    print(f"Ganho médio: {avg_gain}")
+    print(f"Perda média: {avg_loss}")
+    print(f"Duração média dos trades: {avg_duration}")
 
-test_env = CryptoTradingEnv(config=env_config)
 
-obs = test_env.reset()
-done = False
-trades = []
+def plot_trades(trades, df):
+    # Aqui você pode criar gráficos para visualizar os resultados dos trades,
+    # como gráficos de velas e indicadores técnicos usando bibliotecas como
+    # matplotlib, plotly, etc.
+    pass
 
-while not done:
-    action, _states = model.predict(obs, deterministic=True)
-    obs, reward, done, info = test_env.step(action)
 
-    if 'trade' in info:
-        trades.append(info['trade'])
+if __name__ == "__main__":
+    # Carregar o modelo treinado e fazer backtesting
+    model_path = "crypto_trading_agent/data"
+    model = PPO.load(model_path)
 
-print("Total profit:", test_env.total_profit)
-print("Total trades:", test_env.total_trades)
+    # Realizar backtesting
+    trades = backtest(model, env)
 
-# Cálculo da duração média dos trades
-trade_durations = [(trade[2] - trade[0]).total_seconds() for trade in trades]
-average_trade_duration = np.mean(trade_durations)
-print("Average trade duration (seconds):", average_trade_duration)
+    # Analisar os trades
+    analyze_trades(trades)
 
-# Valorização da moeda no período
-initial_value = test_data.iloc[0]['close']
-final_value = test_data.iloc[-1]['close']
-currency_valuation = (final_value - initial_value) / initial_value
-print("Currency valuation:", currency_valuation)
-
-# Plote o gráfico de trades
-plot_trades(test_data, trades, "Trades Visualization")
+    # Plotar os trades e resultados
+    plot_trades(trades, env.data.df)

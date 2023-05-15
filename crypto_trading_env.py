@@ -44,7 +44,9 @@ class CryptoTradingEnv(gym.Env):
 
     def step(self, action):
         self.current_step += 1
-        current_price = self.df.loc[self.current_step, 'close']
+        #current_price = self.df.loc[self.current_step, 'close']
+        current_price = self.df.iloc[self.current_step]['close']
+
         reward = 0
         done = False
 
