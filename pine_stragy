@@ -8,7 +8,7 @@ strategy(title = 'Bybit HF Trend',
          default_qty_value = 100,
          initial_capital = 1000,
          commission_value = 0.075)
-         
+ 
 //************************************************************************* SIGNAL EXTERNAL*****************************************       
 openlongcomment = ''
 closelongcomment = ''
