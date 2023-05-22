@@ -4,10 +4,10 @@ strategy(title = 'Bybit HF Trend',
          overlay = true,
          pyramiding = 0,
          default_qty_value = 100,
-         default_qty_type = strategy.cash,
+         default_qty_type = strategy.percent_of_equity,
          default_qty_value = 100,
-         initial_capital = 100,
-         commission_value = 0.1)
+         initial_capital = 1000,
+         commission_value = 0.075)
          
 //************************************************************************* SIGNAL EXTERNAL*****************************************       
 openlongcomment = ''
@@ -22,6 +22,14 @@ if not(olc == '')
 if not(clc == '')
     closelongcomment := clc
     closelongcomment
+osc = input.string(title='Open Short Comment', defval='', group='SIGNAL EXT', inline='2')
+csc = input.string(title='Close Short Comment', defval='', group='SIGNAL EXT', inline='2')
+if not(osc == '')
+    openshortcomment := osc
+    openshortcomment
+if not(csc == '')
+    closeshortcommment := csc
+    closeshortcommment
 
 //***********************************************************************************************************************************
 
@@ -548,7 +556,7 @@ plot(series = shortTrailingStopLossPrice, title = 'Short Trail Stop', color = st
 takeProfitQuantityPerc = input.float(defval = 100, title = 'Take Profit Quantity %', minval = 0.0, maxval = 100, step = 1.0, tooltip = 'The percentage of the position that will be withdrawn when the take profit price target is reached.', group = 'Take Profit - Quantity')
 
 takeProfitMethod = input.string(defval = 'PERC', title = 'Take Profit Method', options = ['PERC', 'ATR', 'RR'], tooltip = 'The method to calculate the Take Profit price.', group = 'Take Profit - Target')
-longTakeProfitPerc = input.float(defval = 2.05, title = 'Long/Short Take Profit %', minval = 0.05, step = 0.05, inline = 'Take Profit Perc', group = 'Take Profit - Target') / 100
+longTakeProfitPerc = input.float(defval = 0.55, title = 'Long/Short Take Profit %', minval = 0.05, step = 0.05, inline = 'Take Profit Perc', group = 'Take Profit - Target') / 100
 shortTakeProfitPerc = input.float(defval = 0.6, title = '', minval = 0.05, step = 0.05, tooltip = 'The percentage of the price increase/decrease to set the take profit price target for long/short positions.', inline = 'Take Profit Perc', group = 'Take Profit - Target') / 100
 longTakeProfitAtrMul = input.float(defval = 9.0, title = 'ATR Long/Short Mul ', minval = 0.1, step = 0.1, inline = 'Take Profit ATR Multiplier', group = 'Take Profit - Target')
 shortTakeProfitAtrMul = input.float(defval = 9.0, title = '', minval = 0.1, step = 0.1, tooltip = 'ATR multiplier to be used for the long/short Take Profit.', inline = 'Take Profit ATR Multiplier', group = 'Take Profit - Target')
@@ -633,21 +641,21 @@ strategy.close(id = 'Long Entry', when = sell, alert_message = 'Long: Closed at 
 
 ////strategy.close(id = 'Long Entry', when = sell2, comment = 'UBOT', alert_message = 'Long: Closed at market price',comment=closelongcomment)
 // close on trend reversal
-//strategy.close(id = 'Short Entry', when = closeShortPosition, comment = 'Close Short', alert_message = 'Short: Closed at market price')  
+strategy.close(id = 'Short Entry', when = closeShortPosition, alert_message = 'Short: Closed at market price', comment=closeshortcommment)  
 
 // getting into LONG position
 strategy.entry(id = 'Long Entry', direction = strategy.long, when = buy, alert_message = 'Long(' + syminfo.ticker + '): Started', comment = openlongcomment)
 // submit exit order for trailing take profit price also set the stop loss for the take profit percentage in case that stop loss is reached first
-strategy.exit(id = 'Long Take Profit / Stop Loss', from_entry = 'Long Entry', qty_percent = takeProfitQuantityPerc, limit = enableTakeProfitTrailing ? na : longTakeProfitPrice, stop = longTrailingStopLossPrice, trail_price = enableTakeProfitTrailing ? longTakeProfitPrice : na, trail_offset = enableTakeProfitTrailing ? longTrailingTakeProfitStepTicks : na, when = longIsActive, alert_message = 'Long(' + syminfo.ticker + '): Take Profit or Stop Loss executed',comment='Take Profit')
+strategy.exit(id = 'Long Take Profit / Stop Loss', from_entry = 'Long Entry', qty_percent = takeProfitQuantityPerc, limit = enableTakeProfitTrailing ? na : longTakeProfitPrice, stop = longTrailingStopLossPrice, trail_price = enableTakeProfitTrailing ? longTakeProfitPrice : na, trail_offset = enableTakeProfitTrailing ? longTrailingTakeProfitStepTicks : na, when = longIsActive, alert_message = 'Long(' + syminfo.ticker + '): Take Profit or Stop Loss executed',comment = closelongcomment)
 // submit exit order for trailing stop loss price for the remaining percent of the quantity not reserved by the take profit order
-strategy.exit(id = 'Long Stop Loss', from_entry = 'Long Entry', stop = longTrailingStopLossPrice, when = longIsActive, alert_message = 'Long(' + syminfo.ticker + '): Stop Loss executed', comment="STOPLOSS")
+strategy.exit(id = 'Long Stop Loss', from_entry = 'Long Entry', stop = longTrailingStopLossPrice, when = longIsActive, alert_message = 'Long(' + syminfo.ticker + '): Stop Loss executed', comment=closelongcomment)
 
 // getting into SHORT position
-strategy.entry(id = 'Short Entry', direction = strategy.short, when = openShortPosition, alert_message = 'Short(' + syminfo.ticker + '): Started')
+strategy.entry(id = 'Short Entry', direction = strategy.short, when = openShortPosition, alert_message = 'Short(' + syminfo.ticker + '): Started', comment = openshortcomment)
 // submit exit order for trailing take profit price also set the stop loss for the take profit percentage in case that stop loss is reached first
-strategy.exit(id = 'Short Take Profit / Stop Loss', from_entry = 'Short Entry', qty_percent = takeProfitQuantityPerc, limit = enableTakeProfitTrailing ? na : shortTakeProfitPrice, stop = shortTrailingStopLossPrice, trail_price = enableTakeProfitTrailing ? shortTakeProfitPrice : na, trail_offset = enableTakeProfitTrailing ? shortTrailingTakeProfitStepTicks : na, when = shortIsActive, alert_message = 'Short(' + syminfo.ticker + '): Take Profit or Stop Loss executed')
+strategy.exit(id = 'Short Take Profit / Stop Loss', from_entry = 'Short Entry', qty_percent = takeProfitQuantityPerc, limit = enableTakeProfitTrailing ? na : shortTakeProfitPrice, stop = shortTrailingStopLossPrice, trail_price = enableTakeProfitTrailing ? shortTakeProfitPrice : na, trail_offset = enableTakeProfitTrailing ? shortTrailingTakeProfitStepTicks : na, when = shortIsActive, alert_message = 'Short(' + syminfo.ticker + '): Take Profit or Stop Loss executed', comment = closeshortcommment)
 // submit exit order for trailing stop loss price for the remaining percent of the quantity not reserved by the take profit order
-strategy.exit(id = 'Short Stop Loss', from_entry = 'Short Entry', stop = shortTrailingStopLossPrice, when = shortIsActive, alert_message = 'Short(' + syminfo.ticker + '): Stop Loss executed')
+strategy.exit(id = 'Short Stop Loss', from_entry = 'Short Entry', stop = shortTrailingStopLossPrice, when = shortIsActive, alert_message = 'Short(' + syminfo.ticker + '): Stop Loss executed', comment = closeshortcommment)
 
 // PLOT =============================================================================================================
 var posColor = color.new(color.white, 0)
